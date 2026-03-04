@@ -15,13 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/login")
+@RequestMapping("/api/participante")
 public class LoginController {
 
     @Autowired
     private LoginService loginService;
 
-    @PostMapping("/participante")
+    @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginParticipante(@RequestBody Map<String, String> request) {
         try {
             String nome = request.get("nome");
@@ -37,4 +37,19 @@ public class LoginController {
                     Map.of("erro", e.getMessage()));
         }
     }
+
+    @PostMapping("/registrar")
+    public String registrar(@RequestBody String entity) {
+        // TODO: process POST request
+
+        return entity;
+    }
+
+    @PostMapping("/logout")
+    public String logout(@RequestBody String entity) {
+        // TODO: process POST request
+
+        return entity;
+    }
+
 }
