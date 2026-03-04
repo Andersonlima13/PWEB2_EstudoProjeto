@@ -25,12 +25,12 @@ public class LoginController {
     public ResponseEntity<Map<String, String>> loginParticipante(@RequestBody Map<String, String> request) {
         try {
             String nome = request.get("nome");
-            Participante participante = loginService.autenticar(nome);
+            String senha = request.get("senha");
+            Participante participante = loginService.autenticar(nome, senha);
 
             Map<String, String> response = new HashMap<>();
             response.put("nome", participante.getNome());
 
-            // modificar isso aqui, tratar o erro especifico
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
