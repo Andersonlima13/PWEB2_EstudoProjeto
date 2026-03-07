@@ -1,7 +1,8 @@
 package pweb.demo.service;
 
 import org.springframework.stereotype.Service;
-import pweb.demo.model.Corrida;
+import pweb.demo.dto.CorridaDto;
+import pweb.demo.dto.PerguntaDto;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -9,64 +10,80 @@ import java.util.List;
 
 @Service
 public class CorridaService {
-    private Map<Long, Corrida> corridasMap = new HashMap<>();
+    private Map<Long, CorridaDto> corridasMap = new HashMap<>();
     private long proximoId = 1;
 
-    // isso aqui eu vou alterar o id deve ser gerado automaticamente talvez via uuid
     // Criar nova corrida
-    public Corrida criar(Corrida corrida) {
-        validarCorrida(corrida);
-        corrida.setId(proximoId++);
-        corridasMap.put(corrida.getId(), corrida);
-        return corrida;
+    public CorridaDto criar(CorridaDto corridaDto) {
+        validarCorridaDto(corridaDto);
+        corridaDto.setId(proximoId++);
+        if (corridaDto.getPerguntas() == null) {
+            corridaDto.setPerguntas(new ArrayList<>());
+        }
+        corridasMap.put(corridaDto.getId(), corridaDto);
+        return corridaDto;
     }
 
     // Obter corrida por ID
-    public Corrida obter(long id) {
-        Corrida corrida = corridasMap.get(id);
-        if (corrida == null) {
-            throw new IllegalArgumentException("Corrida com ID " + id + " não encontrada");
-        }
-        return corrida;
+    public CorridaDto obter(long id) {
+        validarCorridaExiste(id);
+        return corridasMap.get(id);
     }
 
     // Listar todas as corridas
-    public List<Corrida> listarTodas() {
+    public List<CorridaDto> listarTodas() {
         return new ArrayList<>(corridasMap.values());
     }
 
     // Alterar corrida existente
-    public Corrida alterar(long id, Corrida corridaAtualizada) {
-        Corrida corridaExistente = obter(id);
+    public CorridaDto alterar(CorridaDto corridaDto) {
+        long id = corridaDto.getId();
+        validarCorridaExiste(id);
 
-        corridaExistente.setTempo(corridaAtualizada.getTempo());
-        corridaExistente.setTitulo(corridaAtualizada.getTitulo());
-        corridaExistente.setDescricao(corridaAtualizada.getDescricao());
-        corridaExistente.setPerguntas(corridaAtualizada.getPerguntas());
-        corridaExistente.setIsativa(corridaAtualizada.isIsativa());
-
-        return corridaExistente;
+        corridasMap.put(id, corridaDto);
+        return corridaDto;
     }
 
     // Apagar corrida
     public void apagar(long id) {
-        if (!corridasMap.containsKey(id)) {
-            throw new IllegalArgumentException("Corrida com ID " + id + " não encontrada");
-        }
+        validarCorridaExiste(id);
         corridasMap.remove(id);
     }
 
-    // jogar para um validador só
-    // Validar corrida
-    private void validarCorrida(Corrida corrida) {
-        if (corrida.getTempo() == null) {
+    // Validar corrida DTO
+    private void validarCorridaDto(CorridaDto corridaDto) {
+        if (corridaDto.getTempo() == null) {
             throw new IllegalArgumentException("Tempo é obrigatório");
         }
-        if (corrida.getTitulo() == null || corrida.getTitulo().trim().isEmpty()) {
+        if (corridaDto.getTitulo() == null || corridaDto.getTitulo().trim().isEmpty()) {
             throw new IllegalArgumentException("Título é obrigatório");
         }
-        if (corrida.getDescricao() == null || corrida.getDescricao().trim().isEmpty()) {
+        if (corridaDto.getDescricao() == null || corridaDto.getDescricao().trim().isEmpty()) {
             throw new IllegalArgumentException("Descrição é obrigatória");
         }
     }
+
+    // Validar se corrida existe
+    private void validarCorridaExiste(long id) {
+        if (!corridasMap.containsKey(id)) {
+            throw new IllegalArgumentException("Corrida com ID " + id + " não encontrada");
+        }
+    }
+
+    // Adicionar pergunta à corrida
+    public void adicionarPergunta(long corridaId, PerguntaDto perguntaDto) {
+        CorridaDto corrida = corridasMap.get(corridaId);
+        if (corrida != null && corrida.getPerguntas() != null) {
+            corrida.getPerguntas().add(perguntaDto);
+        }
+    }
+
+    // Remover pergunta da corrida
+    public void removerPergunta(long corridaId, long perguntaId) {
+        CorridaDto corrida = corridasMap.get(corridaId);
+        if (corrida != null && corrida.getPerguntas() != null) {
+            corrida.getPerguntas().removeIf(p -> p.getId() == perguntaId);
+        }
+    }
+
 }

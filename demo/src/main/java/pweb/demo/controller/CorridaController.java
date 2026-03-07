@@ -4,9 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pweb.demo.model.Corrida;
+import pweb.demo.dto.CorridaDto;
 import pweb.demo.service.CorridaService;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +18,10 @@ public class CorridaController {
 
     // Criar nova corrida
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody Corrida corrida) {
+    public ResponseEntity<?> criar(@RequestBody CorridaDto corridaDto) {
         try {
-            Corrida novaCorrida = corridaService.criar(corrida);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novaCorrida);
+            CorridaDto novaCorridag = corridaService.criar(corridaDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(novaCorridag);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("erro", e.getMessage()));
@@ -33,7 +32,7 @@ public class CorridaController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obter(@PathVariable long id) {
         try {
-            Corrida corrida = corridaService.obter(id);
+            CorridaDto corrida = corridaService.obter(id);
             return ResponseEntity.ok(corrida);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -43,16 +42,17 @@ public class CorridaController {
 
     // Listar todas as corridas
     @GetMapping
-    public ResponseEntity<List<Corrida>> listar() {
-        List<Corrida> corridas = corridaService.listarTodas();
+    public ResponseEntity<List<CorridaDto>> listar() {
+        List<CorridaDto> corridas = corridaService.listarTodas();
         return ResponseEntity.ok(corridas);
     }
 
     // Alterar corrida
     @PutMapping("/{id}")
-    public ResponseEntity<?> alterar(@PathVariable long id, @RequestBody Corrida corridaAtualizada) {
+    public ResponseEntity<?> alterar(@PathVariable long id, @RequestBody CorridaDto corridaDto) {
         try {
-            Corrida corridaModificada = corridaService.alterar(id, corridaAtualizada);
+            corridaDto.setId(id);
+            CorridaDto corridaModificada = corridaService.alterar(corridaDto);
             return ResponseEntity.ok(corridaModificada);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
