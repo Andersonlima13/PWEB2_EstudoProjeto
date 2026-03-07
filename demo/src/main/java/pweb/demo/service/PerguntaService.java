@@ -3,6 +3,7 @@ package pweb.demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pweb.demo.dto.PerguntaDto;
+import pweb.demo.dto.AlternativaDto;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -25,6 +26,11 @@ public class PerguntaService {
 
         validarPerguntaDto(perguntaDto);
         perguntaDto.setId(proximoId++);
+
+        // Inicializa lista de alternativas se nula
+        if (perguntaDto.getAlternativas() == null) {
+            perguntaDto.setAlternativas(new ArrayList<>());
+        }
 
         perguntasPorCorrida.computeIfAbsent(corridaId, k -> new HashMap<>())
                 .computeIfAbsent(corridaId, k -> new ArrayList<>())
@@ -117,6 +123,22 @@ public class PerguntaService {
         if (!existe) {
             throw new IllegalArgumentException(
                     "Pergunta com ID " + perguntaId + " não encontrada na corrida " + corridaId);
+        }
+    }
+
+    // Adicionar alternativa à pergunta
+    public void adicionarAlternativa(long corridaId, long perguntaId, AlternativaDto alternativaDto) {
+        PerguntaDto pergunta = obter(corridaId, perguntaId);
+        if (pergunta != null && pergunta.getAlternativas() != null) {
+            pergunta.getAlternativas().add(alternativaDto);
+        }
+    }
+
+    // Remover alternativa da pergunta
+    public void removerAlternativa(long corridaId, long perguntaId, AlternativaDto alternativaDto) {
+        PerguntaDto pergunta = obter(corridaId, perguntaId);
+        if (pergunta != null && pergunta.getAlternativas() != null) {
+            pergunta.getAlternativas().removeIf(a -> a.getId() == alternativaDto.getId());
         }
     }
 }

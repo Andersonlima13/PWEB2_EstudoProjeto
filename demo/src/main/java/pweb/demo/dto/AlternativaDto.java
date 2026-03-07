@@ -17,14 +17,6 @@ public class AlternativaDto {
         this.isCorreta = isCorreta;
     }
 
-    public AlternativaDto(long id, long corridaId, long perguntaId, String descricao, Boolean isCorreta) {
-        this.id = id;
-        this.corridaId = corridaId;
-        this.perguntaId = perguntaId;
-        this.descricao = descricao;
-        this.isCorreta = isCorreta;
-    }
-
     public long getId() {
         return id;
     }

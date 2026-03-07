@@ -2,17 +2,15 @@ package pweb.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pweb.demo.model.Alternativa;
 import pweb.demo.dto.AlternativaDto;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AlternativaService {
-    private Map<Long, Map<Long, List<Alternativa>>> alternativasPorPergunta = new HashMap<>();
+    private Map<Long, Map<Long, List<AlternativaDto>>> alternativasPorPergunta = new HashMap<>();
     private long proximoId = 1;
 
     @Autowired
@@ -26,39 +24,38 @@ public class AlternativaService {
         // Valida se a pergunta existe
         perguntaService.obter(corridaId, perguntaId);
 
-        validarAlternativaDto(alternativaDto);
-        Alternativa alternativa = new Alternativa(proximoId++, alternativaDto.getDescricao(),
-                alternativaDto.isCorreta());
+        alternativaDto.setId(proximoId++);
 
         alternativasPorPergunta.computeIfAbsent(perguntaId, k -> new HashMap<>())
                 .computeIfAbsent(corridaId, k -> new ArrayList<>())
-                .add(alternativa);
+                .add(alternativaDto);
 
-        AlternativaDto dto = converterParaDto(alternativa);
-        dto.setCorridaId(corridaId);
-        dto.setPerguntaId(perguntaId);
-        return dto;
+        // Adiciona alternativa à pergunta
+        perguntaService.adicionarAlternativa(corridaId, perguntaId, alternativaDto);
+
+        return alternativaDto;
     }
 
     // Obter alternativa específica
-    public AlternativaDto obter(long corridaId, long perguntaId, long alternativaId) {
-        validarAlternativaExiste(corridaId, perguntaId, alternativaId);
-        Alternativa alternativa = obterAlternativa(corridaId, perguntaId, alternativaId);
-        return converterParaDto(alternativa);
+    public AlternativaDto obter(AlternativaDto alternativaDto) {
+        long corridaId = alternativaDto.getCorridaId();
+        long perguntaId = alternativaDto.getPerguntaId();
+        long alternativaId = alternativaDto.getId();
+
+        return obterAlternativaDto(corridaId, perguntaId, alternativaId);
     }
 
     // Listar todas as alternativas de uma pergunta
-    public List<AlternativaDto> listarPorPergunta(long corridaId, long perguntaId) {
+    public List<AlternativaDto> listarPorPergunta(AlternativaDto alternativaDto) {
+        long corridaId = alternativaDto.getCorridaId();
+        long perguntaId = alternativaDto.getPerguntaId();
+
         // Valida se a pergunta existe
         perguntaService.obter(corridaId, perguntaId);
 
-        List<Alternativa> alternativas = alternativasPorPergunta
+        return new ArrayList<>(alternativasPorPergunta
                 .getOrDefault(perguntaId, new HashMap<>())
-                .getOrDefault(corridaId, new ArrayList<>());
-
-        return alternativas.stream()
-                .map(this::converterParaDto)
-                .collect(Collectors.toList());
+                .getOrDefault(corridaId, new ArrayList<>()));
     }
 
     // Alterar alternativa
@@ -67,45 +64,35 @@ public class AlternativaService {
         long perguntaId = alternativaDto.getPerguntaId();
         long alternativaId = alternativaDto.getId();
 
-        validarAlternativaExiste(corridaId, perguntaId, alternativaId);
-        Alternativa alternativaExistente = obterAlternativa(corridaId, perguntaId, alternativaId);
+        List<AlternativaDto> alternativas = alternativasPorPergunta
+                .getOrDefault(perguntaId, new HashMap<>())
+                .getOrDefault(corridaId, new ArrayList<>());
 
-        alternativaExistente.setDescricao(alternativaDto.getDescricao());
-        alternativaExistente.setCorreta(alternativaDto.isCorreta());
+        alternativas.stream()
+                .filter(a -> a.getId() == alternativaId)
+                .findFirst()
+                .ifPresent(a -> {
+                    a.setDescricao(alternativaDto.getDescricao());
+                    a.setCorreta(alternativaDto.isCorreta());
+                });
 
-        AlternativaDto dto = converterParaDto(alternativaExistente);
-        dto.setCorridaId(corridaId);
-        dto.setPerguntaId(perguntaId);
-        return dto;
+        return alternativaDto;
     }
 
     // Apagar alternativa
-    public void apagar(long corridaId, long perguntaId, long alternativaId) {
-        validarAlternativaExiste(corridaId, perguntaId, alternativaId);
+    public void apagar(AlternativaDto alternativaDto) {
+        long corridaId = alternativaDto.getCorridaId();
+        long perguntaId = alternativaDto.getPerguntaId();
+        long alternativaId = alternativaDto.getId();
 
-        List<Alternativa> alternativas = alternativasPorPergunta
+        List<AlternativaDto> alternativas = alternativasPorPergunta
                 .getOrDefault(perguntaId, new HashMap<>())
                 .getOrDefault(corridaId, new ArrayList<>());
 
         alternativas.removeIf(a -> a.getId() == alternativaId);
-    }
 
-    // Validar alternativa DTO
-    private void validarAlternativaDto(AlternativaDto alternativaDto) {
-        if (alternativaDto.getDescricao() == null || alternativaDto.getDescricao().trim().isEmpty()) {
-            throw new IllegalArgumentException("Descrição da alternativa é obrigatória");
-        }
-        if (alternativaDto.isCorreta() == null) {
-            throw new IllegalArgumentException("Campo isCorreta é obrigatório");
-        }
-    }
-
-    // Validar se alternativa existe
-    private void validarAlternativaExiste(long corridaId, long perguntaId, long alternativaId) {
-        List<Alternativa> alternativas = alternativasPorPergunta
-                .getOrDefault(perguntaId, new HashMap<>())
-                .getOrDefault(corridaId, new ArrayList<>());
-
+        // Remove alternativa da pergunta
+        perguntaService.removerAlternativa(corridaId, perguntaId, alternativaDto);
         boolean existe = alternativas.stream().anyMatch(a -> a.getId() == alternativaId);
 
         if (!existe) {
@@ -114,9 +101,9 @@ public class AlternativaService {
         }
     }
 
-    // Obter alternativa
-    private Alternativa obterAlternativa(long corridaId, long perguntaId, long alternativaId) {
-        List<Alternativa> alternativas = alternativasPorPergunta
+    // Obter alternativa DTO
+    private AlternativaDto obterAlternativaDto(long corridaId, long perguntaId, long alternativaId) {
+        List<AlternativaDto> alternativas = alternativasPorPergunta
                 .getOrDefault(perguntaId, new HashMap<>())
                 .getOrDefault(corridaId, new ArrayList<>());
 
@@ -124,10 +111,5 @@ public class AlternativaService {
                 .filter(a -> a.getId() == alternativaId)
                 .findFirst()
                 .orElse(null);
-    }
-
-    // Converter Alternativa para AlternativaDto
-    private AlternativaDto converterParaDto(Alternativa alternativa) {
-        return new AlternativaDto(alternativa.getId(), 0, 0, alternativa.getDescricao(), alternativa.isCorreta());
     }
 }

@@ -1,6 +1,6 @@
 package pweb.demo.dto;
 
-import pweb.demo.model.Alternativa;
+import pweb.demo.dto.AlternativaDto;
 import java.util.List;
 
 public class PerguntaDto {
@@ -8,12 +8,12 @@ public class PerguntaDto {
     private long corridaId;
     private String enunciado;
     private long respostaCorreta;
-    private List<Alternativa> alternativas;
+    private List<AlternativaDto> alternativas;
 
     public PerguntaDto() {
     }
 
-    public PerguntaDto(long corridaId, String enunciado, long respostaCorreta, List<Alternativa> alternativas) {
+    public PerguntaDto(long corridaId, String enunciado, long respostaCorreta, List<AlternativaDto> alternativas) {
         this.corridaId = corridaId;
         this.enunciado = enunciado;
         this.respostaCorreta = respostaCorreta;
@@ -21,7 +21,7 @@ public class PerguntaDto {
     }
 
     public PerguntaDto(long id, long corridaId, String enunciado, long respostaCorreta,
-            List<Alternativa> alternativas) {
+            List<AlternativaDto> alternativas) {
         this.id = id;
         this.corridaId = corridaId;
         this.enunciado = enunciado;
@@ -61,11 +61,11 @@ public class PerguntaDto {
         this.respostaCorreta = respostaCorreta;
     }
 
-    public List<Alternativa> getAlternativas() {
+    public List<AlternativaDto> getAlternativas() {
         return alternativas;
     }
 
-    public void setAlternativas(List<Alternativa> alternativas) {
+    public void setAlternativas(List<AlternativaDto> alternativas) {
         this.alternativas = alternativas;
     }
 }

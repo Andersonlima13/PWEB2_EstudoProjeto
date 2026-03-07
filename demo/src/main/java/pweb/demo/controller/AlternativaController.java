@@ -36,7 +36,12 @@ public class AlternativaController {
     public ResponseEntity<?> obter(@PathVariable long corridaId, @PathVariable long perguntaId,
             @PathVariable long alternativaId) {
         try {
-            AlternativaDto alternativa = alternativaService.obter(corridaId, perguntaId, alternativaId);
+            AlternativaDto alternativaDto = new AlternativaDto();
+            alternativaDto.setCorridaId(corridaId);
+            alternativaDto.setPerguntaId(perguntaId);
+            alternativaDto.setId(alternativaId);
+
+            AlternativaDto alternativa = alternativaService.obter(alternativaDto);
             return ResponseEntity.ok(alternativa);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -48,7 +53,11 @@ public class AlternativaController {
     @GetMapping
     public ResponseEntity<?> listar(@PathVariable long corridaId, @PathVariable long perguntaId) {
         try {
-            List<AlternativaDto> alternativas = alternativaService.listarPorPergunta(corridaId, perguntaId);
+            AlternativaDto alternativaDto = new AlternativaDto();
+            alternativaDto.setCorridaId(corridaId);
+            alternativaDto.setPerguntaId(perguntaId);
+
+            List<AlternativaDto> alternativas = alternativaService.listarPorPergunta(alternativaDto);
             return ResponseEntity.ok(alternativas);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -77,7 +86,12 @@ public class AlternativaController {
     public ResponseEntity<?> apagar(@PathVariable long corridaId, @PathVariable long perguntaId,
             @PathVariable long alternativaId) {
         try {
-            alternativaService.apagar(corridaId, perguntaId, alternativaId);
+            AlternativaDto alternativaDto = new AlternativaDto();
+            alternativaDto.setCorridaId(corridaId);
+            alternativaDto.setPerguntaId(perguntaId);
+            alternativaDto.setId(alternativaId);
+
+            alternativaService.apagar(alternativaDto);
             return ResponseEntity
                     .ok(Map.of("mensagem", "Alternativa com ID " + alternativaId + " foi deletada com sucesso"));
         } catch (IllegalArgumentException e) {
