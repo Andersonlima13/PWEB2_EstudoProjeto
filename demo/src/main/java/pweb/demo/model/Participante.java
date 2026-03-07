@@ -1,26 +1,13 @@
 package pweb.demo.model;
 
 public class Participante {
+    private long id;
     private String nome;
     private String senha;
 
-    public Participante getParticipante() {
-        return this;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
+    public Participante(long id, String nome, String senha) {
+        this.id = id;
         this.nome = nome;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
         this.senha = senha;
     }
 }
