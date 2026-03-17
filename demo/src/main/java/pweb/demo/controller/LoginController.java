@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import pweb.demo.dto.ParticipanteDto;
 import pweb.demo.model.Participante;
 import pweb.demo.service.LoginService;
 import java.util.HashMap;
@@ -22,20 +24,9 @@ public class LoginController {
     private LoginService loginService;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> loginParticipante(@RequestBody Map<String, String> request) {
-        try {
-            String nome = request.get("nome");
-            String senha = request.get("senha");
-            Participante participante = loginService.autenticar(nome, senha);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("nome", participante.getNome());
-
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    Map.of("erro", e.getMessage()));
-        }
+    public ResponseEntity<?> login(@RequestBody ParticipanteDto dto) {
+        Participante participante = loginService.autenticar(dto);
+        return ResponseEntity.ok(participante);
     }
 
     @PostMapping("/registrar")
