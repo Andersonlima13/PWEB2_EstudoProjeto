@@ -37,10 +37,9 @@ public class CorridaService {
 
     // Alterar corrida existente
     public CorridaDto alterar(CorridaDto corridaDto) {
-        long id = corridaDto.getId();
-        validarCorridaExiste(id);
-
-        corridasMap.put(id, corridaDto);
+        validarCorridaExiste(corridaDto.getId());
+        verificaNomeDuplicado(corridaDto.getTitulo());
+        corridasMap.put(corridaDto.getId(), corridaDto);
         return corridaDto;
     }
 
@@ -52,6 +51,7 @@ public class CorridaService {
 
     // Validar corrida DTO
     private void validarCorridaDto(CorridaDto corridaDto) {
+        verificaNomeDuplicado(corridaDto.getTitulo());
         if (corridaDto.getTempo() == null) {
             throw new IllegalArgumentException("Tempo é obrigatório");
         }
@@ -67,6 +67,14 @@ public class CorridaService {
     private void validarCorridaExiste(long id) {
         if (!corridasMap.containsKey(id)) {
             throw new IllegalArgumentException("Corrida com ID " + id + " não encontrada");
+        }
+    }
+
+    public void verificaNomeDuplicado(String titulo) {
+        for (CorridaDto corrida : corridasMap.values()) {
+            if (corrida.getTitulo().equalsIgnoreCase(titulo)) {
+                throw new IllegalArgumentException("Título de corrida já existe: " + titulo);
+            }
         }
     }
 
