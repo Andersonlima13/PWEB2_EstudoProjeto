@@ -2,6 +2,8 @@ package pweb.demo.dto;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 public class CorridaDto {
     private long id;
     private Integer tempo;
@@ -78,4 +80,5 @@ public class CorridaDto {
     public void setIsativa(boolean isativa) {
         this.isativa = isativa;
     }
+
 }
