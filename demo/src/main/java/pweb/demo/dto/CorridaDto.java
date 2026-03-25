@@ -2,10 +2,11 @@ package pweb.demo.dto;
 
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
+import jakarta.validation.constraints.Positive;
 
 public class CorridaDto {
     private long id;
+    @Positive
     private Integer tempo;
     private List<PerguntaDto> perguntas;
     private String titulo;

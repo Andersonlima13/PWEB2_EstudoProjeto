@@ -2,8 +2,11 @@ package pweb.demo.model;
 
 import java.util.List;
 
+import jakarta.validation.constraints.Positive;
+
 public class Corrida {
     private long id;
+    @Positive
     private Integer tempo;
     private List<Pergunta> perguntas;
     private String titulo;

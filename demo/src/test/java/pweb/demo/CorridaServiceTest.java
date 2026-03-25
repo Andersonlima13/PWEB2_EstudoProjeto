@@ -2,6 +2,7 @@ package pweb.demo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,18 +32,14 @@ public class CorridaServiceTest {
     @Test
     void deveFalharAoCriarCorridaSemTitulo() {
         CorridaService corridaService = new CorridaService();
-
         CorridaDto dto = new CorridaDto();
         dto.setTempo(12);
         dto.setDescricao("Esse é um teste da corrida sem título");
 
-        try {
-            corridaService.criar(dto);
-        } catch (IllegalArgumentException e) {
-            // Uma boa maneira de evitar erros é criar uma classe especifica para o erro de
-            // titulo
-            assertEquals("Título é obrigatório", e.getMessage());
-        } // evitando falsos negativos por conta do erro nao ser igual
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> corridaService.criar(dto));
+        assertEquals("Título é obrigatório", ex.getMessage());
     }
 
     @Test
@@ -52,11 +49,11 @@ public class CorridaServiceTest {
         dto.setTitulo("Corrida com tempo negativo");
         dto.setTempo(-5);
         dto.setDescricao("Esse é um teste da corrida com tempo negativo");
-        try {
-            corridaService.criar(dto);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Tempo deve ser positivo", e.getMessage());
-        }
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> corridaService.criar(dto));
+        assertEquals("Tempo deve ser positivo", ex.getMessage());
     }
 
     @Test
@@ -65,11 +62,11 @@ public class CorridaServiceTest {
         CorridaDto dto = new CorridaDto();
         dto.setTitulo("Corrida sem descrição");
         dto.setTempo(10);
-        try {
-            corridaService.criar(dto);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Descrição é obrigatória", e.getMessage());
-        }
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> corridaService.criar(dto));
+        assertEquals("Descrição é obrigatória", ex.getMessage());
     }
 
     @Test
@@ -78,11 +75,47 @@ public class CorridaServiceTest {
         CorridaDto dto = new CorridaDto();
         dto.setTitulo("Corrida sem tempo");
         dto.setDescricao("Esse é um teste da corrida sem tempo");
-        try {
-            corridaService.criar(dto);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Tempo é obrigatório", e.getMessage());
-        }
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> corridaService.criar(dto));
+        assertEquals("Tempo é obrigatório", ex.getMessage());
+    }
+
+    @Test
+    void deveFalharCriarCorridaComTempoZero() {
+        CorridaService corridaService = new CorridaService();
+        CorridaDto dto = new CorridaDto();
+        dto.setTitulo("Corrida com tempo zero");
+        dto.setTempo(0);
+        dto.setDescricao("Esse é um teste da corrida com tempo zero");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> corridaService.criar(dto));
+
+        assertEquals("Tempo deve ser positivo", exception.getMessage());
+    }
+
+    @Test
+    void deveFalharAoCriarCorridaDuplicada() {
+        CorridaService corridaService = new CorridaService();
+
+        CorridaDto dto1 = new CorridaDto();
+        dto1.setTitulo("Corrida Duplicada");
+        dto1.setTempo(15);
+        dto1.setDescricao("Primeira corrida com título duplicado");
+        corridaService.criar(dto1);
+
+        CorridaDto dto2 = new CorridaDto();
+        dto2.setTitulo("Corrida Duplicada");
+        dto2.setTempo(20);
+        dto2.setDescricao("Segunda corrida com título duplicado");
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> corridaService.criar(dto2));
+        assertEquals("Título de corrida já existe: Corrida Duplicada", ex.getMessage());
     }
 
 }
